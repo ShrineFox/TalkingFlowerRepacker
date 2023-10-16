@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RstbLibrary\src\RstbLibrary.csproj" />
+    <ProjectReference Include="..\ShrineFox.IO\ShrineFox.IO.csproj" />
+    <ProjectReference Include="..\SimpleCommandLine\Source\SimpleCommandLine\SimpleCommandLine.csproj" />
   </ItemGroup>
 
 </Project>

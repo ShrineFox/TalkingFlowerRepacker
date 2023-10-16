@@ -207,11 +207,10 @@ namespace TalkingFlowerRepacker
             xmsbtText += "</xmsbt>";
 
             System.IO.File.WriteAllText(xmsbtPath, xmsbtText);
-
-            MSBT msbt = new MSBT("./Dependencies/Blank.mstb");
+            MSBT msbt = new MSBT("./Dependencies/Test.msbt");
             msbt.ImportXMSBT(xmsbtPath, true);
-            msbt.Save();
-            System.IO.File.Delete(xmsbtPath);
+            msbt.Save(msbtPath);
+            //System.IO.File.Delete(xmsbtPath);
         }
 
         public MSBT(string filename)
@@ -509,54 +508,49 @@ namespace TalkingFlowerRepacker
         }
 
         // Saving
-        public bool Save()
+        public bool Save(string path)
         {
             bool result = false;
 
-            try
+            FileStream fs = System.IO.File.Create(path);
+            BinaryWriterX bw = new BinaryWriterX(fs);
+
+            // Byte Order
+            bw.ByteOrder = Header.ByteOrderMark[0] > Header.ByteOrderMark[1] ? ByteOrder.LittleEndian : ByteOrder.BigEndian;
+
+            // Header
+            bw.WriteASCII(Header.Identifier);
+            bw.Write(Header.ByteOrderMark);
+            bw.Write(Header.Unknown1);
+            bw.Write((byte)Header.EncodingByte);
+            bw.Write(Header.Unknown2);
+            bw.Write(Header.NumberOfSections);
+            bw.Write(Header.Unknown3);
+            bw.Write(Header.FileSize);
+            bw.Write(Header.Unknown4);
+
+            foreach (string section in SectionOrder)
             {
-                FileStream fs = System.IO.File.Create(File.FullName);
-                BinaryWriterX bw = new BinaryWriterX(fs);
-
-                // Byte Order
-                bw.ByteOrder = Header.ByteOrderMark[0] > Header.ByteOrderMark[1] ? ByteOrder.LittleEndian : ByteOrder.BigEndian;
-
-                // Header
-                bw.WriteASCII(Header.Identifier);
-                bw.Write(Header.ByteOrderMark);
-                bw.Write(Header.Unknown1);
-                bw.Write((byte)Header.EncodingByte);
-                bw.Write(Header.Unknown2);
-                bw.Write(Header.NumberOfSections);
-                bw.Write(Header.Unknown3);
-                bw.Write(Header.FileSize);
-                bw.Write(Header.Unknown4);
-
-                foreach (string section in SectionOrder)
-                {
-                    if (section == "LBL1")
-                        WriteLBL1(bw);
-                    else if (section == "NLI1")
-                        WriteNLI1(bw);
-                    else if (section == "ATO1")
-                        WriteATO1(bw);
-                    else if (section == "ATR1")
-                        WriteATR1(bw);
-                    else if (section == "TSY1")
-                        WriteTSY1(bw);
-                    else if (section == "TXT2")
-                        WriteTXT2(bw);
-                }
-
-                // Update FileSize
-                long fileSize = bw.BaseStream.Position;
-                bw.BaseStream.Seek(Header.FileSizeOffset, SeekOrigin.Begin);
-                bw.Write((UInt32)fileSize);
-
-                bw.Close();
+                if (section == "LBL1")
+                    WriteLBL1(bw);
+                else if (section == "NLI1")
+                    WriteNLI1(bw);
+                else if (section == "ATO1")
+                    WriteATO1(bw);
+                else if (section == "ATR1")
+                    WriteATR1(bw);
+                else if (section == "TSY1")
+                    WriteTSY1(bw);
+                else if (section == "TXT2")
+                    WriteTXT2(bw);
             }
-            catch (Exception)
-            { }
+
+            // Update FileSize
+            long fileSize = bw.BaseStream.Position;
+            bw.BaseStream.Seek(Header.FileSizeOffset, SeekOrigin.Begin);
+            bw.Write((UInt32)fileSize);
+
+            bw.Close();
 
             return result;
         }
@@ -906,45 +900,40 @@ namespace TalkingFlowerRepacker
         {
             string result = "Successfully imported from XMSBT.";
 
-            try
+            if (HasLabels)
             {
-                if (HasLabels)
+                XmlDocument xmlDocument = new XmlDocument();
+                xmlDocument.Load(filename);
+
+                XmlNode xmlRoot = xmlDocument.SelectSingleNode("/xmsbt");
+
+                Dictionary<string, Label> labels = new Dictionary<string, Label>();
+                foreach (Label lbl in LBL1.Labels)
+                    labels.Add(lbl.Name, lbl);
+
+                foreach (XmlNode entry in xmlRoot.SelectNodes("entry"))
                 {
-                    XmlDocument xmlDocument = new XmlDocument();
-                    xmlDocument.Load(filename);
+                    string label = entry.Attributes["label"].Value;
+                    byte[] str = FileEncoding.GetBytes(entry.SelectSingleNode("text").InnerText.Replace("\r\n", "\n").Replace(@"\0", "\0") + "\0");
 
-                    XmlNode xmlRoot = xmlDocument.SelectSingleNode("/xmsbt");
-
-                    Dictionary<string, Label> labels = new Dictionary<string, Label>();
-                    foreach (Label lbl in LBL1.Labels)
-                        labels.Add(lbl.Name, lbl);
-
-                    foreach (XmlNode entry in xmlRoot.SelectNodes("entry"))
+                    if (labels.ContainsKey(label))
+                        labels[label].String.Value = str;
+                    else if (addNew)
                     {
-                        string label = entry.Attributes["label"].Value;
-                        byte[] str = FileEncoding.GetBytes(entry.SelectSingleNode("text").InnerText.Replace("\r\n", "\n").Replace(@"\0", "\0") + "\0");
-
-                        if (labels.ContainsKey(label))
-                            labels[label].String.Value = str;
-                        else if (addNew)
+                        if (label.Trim().Length <= MSBT.LabelMaxLength && Regex.IsMatch(label.Trim(), MSBT.LabelFilter))
                         {
-                            if (label.Trim().Length <= MSBT.LabelMaxLength && Regex.IsMatch(label.Trim(), MSBT.LabelFilter))
-                            {
-                                Label lbl = AddLabel(label);
-                                lbl.String.Value = str;
-                            }
+                            Label lbl = AddLabel(label);
+                            lbl.String.Value = str;
                         }
                     }
                 }
-                else
-                {
-                    result = "XMSBT does not currently support files without an LBL1 section.";
-                }
             }
-            catch (Exception ex)
+            else
             {
-                result = "Unknown Error - " + ex.Message;
+                result = "XMSBT does not currently support files without an LBL1 section.";
             }
+
+            Console.WriteLine(result);
 
             return result;
         }

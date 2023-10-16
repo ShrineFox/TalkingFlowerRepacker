@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TalkingFlowerRepacker", "Ta
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RstbLibrary", "..\RstbLibrary\src\RstbLibrary.csproj", "{455D8631-D945-4587-A1B2-D2639EC9DB18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleCommandLine", "..\SimpleCommandLine\Source\SimpleCommandLine\SimpleCommandLine.csproj", "{7A1F22A9-5EED-4F8D-A3C9-A99B8ECFACB0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShrineFox.IO", "..\ShrineFox.IO\ShrineFox.IO.csproj", "{7640412A-7372-4925-B20C-0178D8818A8F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{455D8631-D945-4587-A1B2-D2639EC9DB18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{455D8631-D945-4587-A1B2-D2639EC9DB18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{455D8631-D945-4587-A1B2-D2639EC9DB18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A1F22A9-5EED-4F8D-A3C9-A99B8ECFACB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A1F22A9-5EED-4F8D-A3C9-A99B8ECFACB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A1F22A9-5EED-4F8D-A3C9-A99B8ECFACB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A1F22A9-5EED-4F8D-A3C9-A99B8ECFACB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7640412A-7372-4925-B20C-0178D8818A8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7640412A-7372-4925-B20C-0178D8818A8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7640412A-7372-4925-B20C-0178D8818A8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7640412A-7372-4925-B20C-0178D8818A8F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
