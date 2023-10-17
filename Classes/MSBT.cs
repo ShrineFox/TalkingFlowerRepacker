@@ -203,14 +203,14 @@ namespace TalkingFlowerRepacker
 
             string xmsbtText = "<?xml version=\"1.0\"?>\n<xmsbt>\n";
             foreach (var label in labels)
-                xmsbtText += $"\t<entry label=\"{label.Item1}\">\n\t\t<text>{label.Item2}</text>\n\t</entry>\n";
+                xmsbtText += $"\t<entry label=\"{label.Item1}\">\n\t\t<text>{label.Item2.Replace("\\n","\n")}</text>\n\t</entry>\n";
             xmsbtText += "</xmsbt>";
 
             System.IO.File.WriteAllText(xmsbtPath, xmsbtText);
             MSBT msbt = new MSBT("./Dependencies/Test.msbt");
             msbt.ImportXMSBT(xmsbtPath, true);
             msbt.Save(msbtPath);
-            //System.IO.File.Delete(xmsbtPath);
+            System.IO.File.Delete(xmsbtPath);
         }
 
         public MSBT(string filename)

@@ -15,17 +15,24 @@ namespace TalkingFlowerRepacker
             var voiceOnly = GetDialog("./Dependencies/TalkFlower_VoiceOnly.msbt.tsv");
             var random = GetRandomDialog();
 
+            int rndCount = 0;
             for (int i = 0; i < placement.Count; i++)
             {
-                Random rnd = new Random();
-                var randomLine = random[rnd.Next(0, random.Count - 1)];
+                if (rndCount >= random.Count)
+                    rndCount = 0;
+
+                var randomLine = random[rndCount];
+                rndCount++;
 
                 placement[i] = new Tuple<string, string, string>(placement[i].Item1, randomLine.Item1, randomLine.Item2);
             }
             for (int i = 0; i < voiceOnly.Count; i++)
             {
-                Random rnd = new Random();
-                var randomLine = random[rnd.Next(0, random.Count - 1)];
+                if (rndCount >= random.Count)
+                    rndCount = 0;
+
+                var randomLine = random[rndCount];
+                rndCount++;
 
                 voiceOnly[i] = new Tuple<string, string, string>(voiceOnly[i].Item1, randomLine.Item1, randomLine.Item2);
             }
@@ -81,9 +88,9 @@ namespace TalkingFlowerRepacker
                 {
                     if (!File.Exists(bwavPath))
                     {
-                        Exe.Run(Path.GetFullPath("./Dependencies/opusenc.exe"), $"-i \"{wavPath}\"");
+                        Exe.Run(Path.GetFullPath("./Dependencies/brstm_converter-clang-amd64.exe"), $"\"{wavPath}\" -o \"{bwavPath}\"");
                         using (FileSys.WaitForFile(wavPath)) { }
-                        if (!File.Exists(bwavPath))
+                        if (!File.Exists(bwavPath) || new FileInfo(bwavPath).Length == 0)
                             Console.WriteLine($"Failed to convert to BWAV: {wavPath}");
                     }
 
