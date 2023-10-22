@@ -1,11 +1,14 @@
 ﻿using RstbLibrary;
+using ShrineFox.IO;
 using Soft160.Data.Cryptography;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Zstandard.Net;
 
 namespace TalkingFlowerRepacker
@@ -15,6 +18,13 @@ namespace TalkingFlowerRepacker
 
         public static void RemoveEntries(string rstbPath)
         {
+            if (!File.Exists(rstbPath))
+            {
+                Console.WriteLine($"Could not find path to input RSTB: \"{rstbPath}\"" +
+                    $"\n\tSkipping RSTB patching...", ConsoleColor.Yellow);
+                return;
+            }
+
             // Read game dump rstb.zs
             RSTB restbl = RSTB.FromBinary(Decompress(rstbPath));
 
@@ -23,9 +33,12 @@ namespace TalkingFlowerRepacker
             {
                 uint crc = StringToCRC32(path);
                 if (restbl.CrcMap.Any(x => x.Key.Equals(crc)))
+                {
                     restbl.CrcMap.Remove(crc);
+                    Output.Log($"Successfully found and removed CRC32 ({crc}) for path: \"{path}\"", ConsoleColor.Green);
+                }
                 else
-                    Console.WriteLine("Not Found: " + path);
+                    Output.Log($"Could not find CRC ({crc}) for path: \"{path}\"", ConsoleColor.Red);
             }
 
             // Create output directory
@@ -34,6 +47,8 @@ namespace TalkingFlowerRepacker
 
             // Repack rstb.zs
             Compress(restbl.ToBinary().ToArray(), outPath);
+
+            Output.Log($"\n\nSaved new RSTB file to: \"{outPath}\"");
         }
 
         private static uint StringToCRC32(string path)

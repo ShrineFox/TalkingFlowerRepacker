@@ -88,7 +88,7 @@ namespace TalkingFlowerRepacker
                 {
                     if (!File.Exists(bwavPath))
                     {
-                        Exe.Run(Path.GetFullPath("./Dependencies/brstm_converter-clang-amd64.exe"), $"\"{wavPath}\" -o \"{bwavPath}\"");
+                        Exe.Run(Path.GetFullPath("./Dependencies/brstm_converter-clang-amd64.exe"), $"\"{wavPath}\" -o \"{bwavPath}\" --oEndian 0");
                         using (FileSys.WaitForFile(wavPath)) { }
                         if (!File.Exists(bwavPath) || new FileInfo(bwavPath).Length == 0)
                             Console.WriteLine($"Failed to convert to BWAV: {wavPath}");
@@ -133,6 +133,12 @@ namespace TalkingFlowerRepacker
             }
 
             return randomDlg;
+        }
+
+        internal static void UpdateSoundInfo(string bymlPath)
+        {
+            // TODO: Decompress ZSTD
+            //File.WriteAllText($"./Dependencies/{Path.GetFileNameWithoutExtension(bymlPath)}.yml", Byml.FromBinary(File.ReadAllBytes(bymlPath)).ToText());
         }
     }
 }

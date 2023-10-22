@@ -9672,6 +9672,7 @@ Voice/Resource/USpt/Voice/TalkFlower_VoiceOnly_Stream/VO_Star_000_02.bwav
 Voice/Resource/USpt/Voice/TalkFlower_VoiceOnly_Stream/VO_Star_000_03.bwav
 Voice/Resource/USpt/Voice/TalkFlower_VoiceOnly_Stream/VO_Star_000_04.bwav
 Voice/Resource/USpt/Voice/TalkFlower_VoiceOnly_Stream/VO_Star_000_05.bwav
+Voice/BwavInfo/USen.byml
 Mals/CNzh.Product.100.sarc
 Mals/EUde.Product.100.sarc
 Mals/EUen.Product.100.sarc
@@ -9689,3 +9690,4 @@ Mals/USes.Product.100.sarc
 Mals/USfr.Product.100.sarc
 Mals/USpt.Product.100.sarc
 Model/ObjectTalkingFlower.bfres
+Model/ObjectTalkingFlowerAnm.bfres
