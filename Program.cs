@@ -13,8 +13,9 @@ namespace TalkingFlowerRepacker
         {
             ShrineFox.IO.Output.Logging = true;
 
-            ResourceTable.RemoveEntries(args[0]);
-            BWAV.ReplaceRandomDialog(args[1]);
+            //ResourceTable.RemoveEntries(args[0]);
+            //BWAV.ReplaceRandomDialog(args[1]);
+            BWAV.ReplaceBarsVoices(args[2], args[3]);
 
             Output.Log("\n\nDone, press any key to exit.");
             Console.ReadKey();

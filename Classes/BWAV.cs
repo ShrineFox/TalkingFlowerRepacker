@@ -37,11 +37,33 @@ namespace TalkingFlowerRepacker
                 voiceOnly[i] = new Tuple<string, string, string>(voiceOnly[i].Item1, randomLine.Item1, randomLine.Item2);
             }
 
-            CreateNewBWAVs(placement, "TalkFlower_Placement_Stream");
-            CreateNewBWAVs(voiceOnly, "TalkFlower_VoiceOnly_Stream");
+            CreateNewBWAVs();
+            CopyBWAVs(placement, "TalkFlower_Placement_Stream");
+            CopyBWAVs(voiceOnly, "TalkFlower_VoiceOnly_Stream");
             CreateNewMSBTs(placement, "TalkFlower_Placement.msbt");
             CreateNewMSBTs(voiceOnly, "TalkFlower_VoiceOnly.msbt");
             RepackMessageSARC(sarcPath);
+        }
+
+        private static void CreateNewBWAVs()
+        {
+            if (Directory.Exists("./Dependencies/Wav/Random"))
+            {
+                foreach (var wavPath in Directory.GetFiles("./Dependencies/Wav/Random", "*.wav", SearchOption.TopDirectoryOnly))
+                {
+                    string bwavPath = FileSys.GetExtensionlessPath(wavPath) + ".bwav";
+
+                    if (!File.Exists(bwavPath) || new FileInfo(bwavPath).Length == 0)
+                    {
+                        Exe.Run(Path.GetFullPath("./Dependencies/brstm_converter-clang-amd64.exe"), 
+                            $"\"{Path.GetFullPath(wavPath)}\" -o \"{Path.GetFullPath(bwavPath)}\"  --oEndian 0\"");
+
+                        using (FileSys.WaitForFile(wavPath)) { }
+                        if (!File.Exists(bwavPath) || new FileInfo(bwavPath).Length == 0)
+                            Console.WriteLine($"Failed to convert to BWAV: {wavPath}");
+                    }
+                }
+            }
         }
 
         private static void RepackMessageSARC(string sarcPath)
@@ -70,7 +92,7 @@ namespace TalkingFlowerRepacker
             MSBT.Write(labelsAndText, Path.Combine(outDir, msbtName));
         }
 
-        private static void CreateNewBWAVs(List<Tuple<string, string, string>> list, string folderName)
+        private static void CopyBWAVs(List<Tuple<string, string, string>> list, string folderName)
         {
             string outDir = $"./Output/Voice/Resource/USen/Voice/{folderName}";
             if (Directory.Exists(outDir))
@@ -84,25 +106,12 @@ namespace TalkingFlowerRepacker
 
                 string copiedBwavPath = Path.Combine(outDir, entry.Item1 + ".bwav");
 
-                if (File.Exists(wavPath))
+                if (File.Exists(bwavPath))
                 {
-                    if (!File.Exists(bwavPath))
-                    {
-                        Exe.Run(Path.GetFullPath("./Dependencies/brstm_converter-clang-amd64.exe"), $"\"{wavPath}\" -o \"{bwavPath}\" --oEndian 0");
-                        using (FileSys.WaitForFile(wavPath)) { }
-                        if (!File.Exists(bwavPath) || new FileInfo(bwavPath).Length == 0)
-                            Console.WriteLine($"Failed to convert to BWAV: {wavPath}");
-                    }
-
-                    if (File.Exists(bwavPath))
-                    {
-                        Directory.CreateDirectory(Path.GetDirectoryName(copiedBwavPath));
-                        File.Copy(bwavPath, copiedBwavPath);
-                    }
+                    Directory.CreateDirectory(Path.GetDirectoryName(copiedBwavPath));
+                    File.Copy(bwavPath, copiedBwavPath);
                 }
-                else
-                    Console.WriteLine($"Could not find WAV: {wavPath}");
-            }
+        }
         }
 
         private static List<Tuple<string,string,string>> GetDialog(string tsvPath = "./Dependencies/TalkFlower_Placement.msbt.tsv")
@@ -139,6 +148,21 @@ namespace TalkingFlowerRepacker
         {
             // TODO: Decompress ZSTD
             //File.WriteAllText($"./Dependencies/{Path.GetFileNameWithoutExtension(bymlPath)}.yml", Byml.FromBinary(File.ReadAllBytes(bymlPath)).ToText());
+        }
+
+        internal static void ReplaceBarsVoices(string extractedBarsDir, string bwavToUseDir)
+        {
+            var userBwav = Directory.GetFiles(bwavToUseDir, "*.bwav", SearchOption.AllDirectories);
+            List<FileInfo> userBwavInfo = new();
+            foreach (var file in userBwav)
+                userBwavInfo.Add(new FileInfo(file));
+
+            foreach (var bwav in Directory.GetFiles(extractedBarsDir, "*.BWAV", SearchOption.AllDirectories).Where(x => Path.GetFileNameWithoutExtension(x).StartsWith("Voice_Mario_")))
+            {
+                FileInfo fi = new FileInfo(bwav);
+                var compatibleBwavs = userBwavInfo.Where(x => x.Length <= fi.Length).OrderBy(x => x.Length).Reverse();
+                File.Copy(compatibleBwavs.First().FullName, bwav, true);
+            }
         }
     }
 }
