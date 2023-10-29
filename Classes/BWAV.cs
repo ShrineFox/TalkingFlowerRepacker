@@ -9,32 +9,36 @@ namespace TalkingFlowerRepacker
 {
     public class BWAV
     {
-        internal static void ReplaceRandomDialog(string sarcPath)
+        internal static void ReplaceDialog(string sarcPath, bool random = false)
         {
             var placement = GetDialog();
             var voiceOnly = GetDialog("./Dependencies/TalkFlower_VoiceOnly.msbt.tsv");
-            var random = GetRandomDialog();
 
-            int rndCount = 0;
-            for (int i = 0; i < placement.Count; i++)
+            if (random)
             {
-                if (rndCount >= random.Count)
-                    rndCount = 0;
+                var randomDlg = GetRandomDialog();
 
-                var randomLine = random[rndCount];
-                rndCount++;
+                int rndCount = 0;
+                for (int i = 0; i < placement.Count; i++)
+                {
+                    if (rndCount >= randomDlg.Count)
+                        rndCount = 0;
 
-                placement[i] = new Tuple<string, string, string>(placement[i].Item1, randomLine.Item1, randomLine.Item2);
-            }
-            for (int i = 0; i < voiceOnly.Count; i++)
-            {
-                if (rndCount >= random.Count)
-                    rndCount = 0;
+                    var randomLine = randomDlg[rndCount];
+                    rndCount++;
 
-                var randomLine = random[rndCount];
-                rndCount++;
+                    placement[i] = new Tuple<string, string, string>(placement[i].Item1, randomLine.Item1, randomLine.Item2);
+                }
+                for (int i = 0; i < voiceOnly.Count; i++)
+                {
+                    if (rndCount >= randomDlg.Count)
+                        rndCount = 0;
 
-                voiceOnly[i] = new Tuple<string, string, string>(voiceOnly[i].Item1, randomLine.Item1, randomLine.Item2);
+                    var randomLine = randomDlg[rndCount];
+                    rndCount++;
+
+                    voiceOnly[i] = new Tuple<string, string, string>(voiceOnly[i].Item1, randomLine.Item1, randomLine.Item2);
+                }
             }
 
             CreateNewBWAVs();
@@ -47,9 +51,9 @@ namespace TalkingFlowerRepacker
 
         private static void CreateNewBWAVs()
         {
-            if (Directory.Exists("./Dependencies/Wav/Random"))
+            if (Directory.Exists("./Dependencies/Wav"))
             {
-                foreach (var wavPath in Directory.GetFiles("./Dependencies/Wav/Random", "*.wav", SearchOption.TopDirectoryOnly))
+                foreach (var wavPath in Directory.GetFiles("./Dependencies/Wav", "*.wav", SearchOption.AllDirectories))
                 {
                     string bwavPath = FileSys.GetExtensionlessPath(wavPath) + ".bwav";
 
