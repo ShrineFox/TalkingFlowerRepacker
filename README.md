@@ -1,6 +1,8 @@
 # About This Program
 TalkingFlowerRepacker is a commandline utility I made to quickly generate matching text and voice files for Super Mario Wonder.  
 Right now, it's only useful for the US English voices/text for the talking flower, but can be expanded for use with other things.  
+
+# How It Works
 It works by patching your RSTB (Resource Size Table) file (from ``romfs\System\Resource``) to remove all the flower-related size entries, allowing unlimited filesizes.  
 Then, it generates a new SARC from your input ``romfs\Mals\USen.Product.100.sarc.zs`` file, containing your custom text.  
 Finally, it generates replacements for the streaming audio BWAV files in ``romfs\Voice\Resource\USen\Voice\`` with your custom WAVs.
